@@ -2,11 +2,16 @@
 
 from pico2d import *
 import math
+from time import perf_counter, sleep
 
-open_canvas(800, 600, sync=True)
+FRAME_TIME = 1.0 / 60
+
+open_canvas(800, 600, sync=False)
 boy = load_image('character.png')
 
 def draw_boy(x, y):
+    start = perf_counter()
+
     for event in get_events():
         if event.type == SDL_QUIT or (
             event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE
@@ -17,7 +22,10 @@ def draw_boy(x, y):
     clear_canvas()
     boy.draw(x, y)
     update_canvas()
-    # delay(0.01)
+
+    remaining = FRAME_TIME - (perf_counter() - start)
+    if remaining > 0:
+        sleep(remaining)
 
 def move_circle():
     for degree in range(360):
