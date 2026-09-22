@@ -36,15 +36,15 @@ def move_top():
 #     for x in range(200, 400, 5):
 #         draw_boy(x, 100)
 
-# def move_left():
-#     for y in range(500, 100, -5):
-#             draw_boy(200, y)
+def move_left():
+    for y in range(500, 100, -5):
+            draw_boy(200, y)
 
 def move_rectangle():     
     # move_bottom_1()
     # move_right()
     move_top()
-    # move_left()
+    move_left()
     # move_bottom_2()
 
 def move_triangle():
