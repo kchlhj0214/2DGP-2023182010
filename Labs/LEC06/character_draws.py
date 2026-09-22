@@ -49,7 +49,7 @@ def move_rectangle():
     move_bottom_2()
 
 def move_triangle_1():
-    for x in range(200, 600, 6):
+    for x in range(400, 600, 6):
         draw_boy(x, 100)
 
 def move_triangle_2():
@@ -65,10 +65,15 @@ def move_triangle_3():
         draw_boy(x, y)
         y -= 6
 
+def move_triangle_4():
+    for x in range(200, 400, 6):
+        draw_boy(x, 100)
+
 def move_triangle():
     move_triangle_1()
     move_triangle_2()
-    move_triangle_3() 
+    move_triangle_3()
+    move_triangle_4()
 
 while True:
     move_circle()
