@@ -24,9 +24,9 @@ def move_top():
     for x in range(600, 200, -5):
             draw_boy(x, 500)
 
-# def move_right():
-#     for y in range(100, 500, 5):
-#             draw_boy(600, y)
+def move_right():
+    for y in range(100, 500, 5):
+            draw_boy(600, y)
 
 # def move_bottom_1():
 #     for x in range(400, 600, 5):
@@ -42,7 +42,7 @@ def move_left():
 
 def move_rectangle():     
     # move_bottom_1()
-    # move_right()
+    move_right()
     move_top()
     move_left()
     # move_bottom_2()
