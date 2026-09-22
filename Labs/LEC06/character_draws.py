@@ -49,11 +49,15 @@ def draw_boy(x, y):
 #     move_bottom_2()
 
 def move_triangle_1():
-    for x in range(200, 600, 5):
+    for x in range(200, 600, 4):
         draw_boy(x, 100)
 
 def move_triangle_2():
-    print('triangle2')
+    y = 100
+    for x in range(600, 400, -2):
+        draw_boy(x, y)
+        y += 4
+
 
 def move_triangle_3():
     print('triangle3')
