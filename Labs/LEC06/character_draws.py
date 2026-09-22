@@ -28,29 +28,25 @@ def move_right():
     for y in range(100, 500, 5):
             draw_boy(600, y)
 
-# def move_bottom_1():
-#     for x in range(400, 600, 5):
-#         draw_boy(x, 100)
+def move_bottom_1():
+    for x in range(400, 600, 5):
+        draw_boy(x, 100)
 
-# def move_bottom_2():
-#     for x in range(200, 400, 5):
-#         draw_boy(x, 100)
+def move_bottom_2():
+    for x in range(200, 400, 5):
+        draw_boy(x, 100)
 
 def move_left():
     for y in range(500, 100, -5):
             draw_boy(200, y)
 
-def move_bottom():
-    for x in range(200, 600, 5):
-        draw_boy(x, 100)
 
 def move_rectangle():     
-    # move_bottom_1()
+    move_bottom_1()
     move_right()
     move_top()
     move_left()
-    # move_bottom_2()
-    move_bottom()
+    move_bottom_2()
 
 def move_triangle():
     print('triangle')
