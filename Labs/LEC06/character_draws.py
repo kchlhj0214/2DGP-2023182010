@@ -14,7 +14,7 @@ boy = load_image('character.png')
 
 def move_circle():
     for degree in range(360):
-        theta = math.radians(degree)
+        theta = math.radians(degree + 270)
         x = 400 + 200 * math.cos(theta)
         y = 300 + 200 * math.sin(theta)
 
