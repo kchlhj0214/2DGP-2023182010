@@ -8,7 +8,7 @@ boy = load_image('character.png')
 clear_canvas()
 boy.draw(400, 300)
 update_canvas()
-delay(10)
+delay(1)
 close_canvas()
 
 # def move_circle():
