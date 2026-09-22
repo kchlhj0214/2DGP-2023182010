@@ -49,7 +49,8 @@ def draw_boy(x, y):
 #     move_bottom_2()
 
 def move_triangle_1():
-    print('triangle1')
+    for x in range(200, 600, 5):
+        draw_boy(x, 100)
 
 def move_triangle_2():
     print('triangle2')
