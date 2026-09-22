@@ -3,7 +3,7 @@
 from pico2d import *
 import math
 
-open_canvas(800, 600)
+open_canvas(800, 600, sync=True)
 boy = load_image('character.png')
 
 def draw_boy(x, y):
@@ -56,24 +56,23 @@ def move_rectangle():
     move_bottom_2()
 
 def move_triangle_1():
-    for x in range(400, 600, 6):
+    for x in range(400, 600, 4):
         draw_boy(x, 100)
 
 def move_triangle_2():
     y = 100
-    for x in range(600, 400, -3):
+    for x in range(600, 400, -2):
         draw_boy(x, y)
-        y += 6
-
+        y += 4
 
 def move_triangle_3():
     y = 500
-    for x in range(400, 200, -3):
+    for x in range(400, 200, -2):
         draw_boy(x, y)
-        y -= 6
+        y -= 4
 
 def move_triangle_4():
-    for x in range(200, 400, 6):
+    for x in range(200, 400, 4):
         draw_boy(x, 100)
 
 def move_triangle():
