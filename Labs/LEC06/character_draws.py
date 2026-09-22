@@ -85,6 +85,6 @@ while True:
     move_circle()
     move_rectangle()
     move_triangle()
-    break
+    # break
 
-# 단일 시행 2차 테스트
+# 반복 시행 1차 테스트
