@@ -3,8 +3,8 @@
 from pico2d import *
 import math
 
-open_canvas(800, 600)
-boy = load_image('character.png')
+# open_canvas(800, 600)
+# boy = load_image('character.png')
 
 # clear_canvas()
 # boy.draw(400, 300)
@@ -13,18 +13,34 @@ boy = load_image('character.png')
 # close_canvas()
 
 def move_circle():
-    for degree in range(360):
-        theta = math.radians(degree + 270)
-        x = 400 + 200 * math.cos(theta)
-        y = 300 + 200 * math.sin(theta)
+    # for degree in range(360):
+    #     theta = math.radians(degree + 270)
+    #     x = 400 + 200 * math.cos(theta)
+    #     y = 300 + 200 * math.sin(theta)
 
-        clear_canvas()
-        boy.draw(x, y)
-        update_canvas()
-        delay(0.01)
+    #     clear_canvas()
+    #     boy.draw(x, y)
+    #     update_canvas()
+    #     delay(0.01)
+    print('circle')
+
+def move_top():
+    print('top')
+
+def move_right():
+    print('right')
+
+def move_bottom():
+    print('bottom')
+
+def move_left():
+    print('left')
 
 def move_rectangle():
-    print('rectangle')
+    move_top()
+    move_right()
+    move_bottom()
+    move_left()
 
 def move_triangle():
     print('triangle')
