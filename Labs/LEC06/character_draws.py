@@ -86,3 +86,5 @@ while True:
     move_rectangle()
     move_triangle()
     break
+
+# 단일 시행 1차 테스트
