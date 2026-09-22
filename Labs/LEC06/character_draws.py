@@ -20,7 +20,7 @@ def draw_boy(x, y):
     delay(0.01)
 
 def move_circle():
-    for degree in range(360):
+    for degree in range(0, 360, 3):
         theta = math.radians(degree + 270)
         x = 400 + 200 * math.cos(theta)
         y = 300 + 200 * math.sin(theta)
@@ -28,23 +28,23 @@ def move_circle():
         draw_boy(x, y)
 
 def move_top():
-    for x in range(600, 200, -5):
+    for x in range(600, 200, -8):
             draw_boy(x, 500)
 
 def move_right():
-    for y in range(100, 500, 5):
+    for y in range(100, 500, 8):
             draw_boy(600, y)
 
 def move_bottom_1():
-    for x in range(400, 600, 5):
+    for x in range(400, 600, 8):
         draw_boy(x, 100)
 
 def move_bottom_2():
-    for x in range(200, 400, 5):
+    for x in range(200, 400, 8):
         draw_boy(x, 100)
 
 def move_left():
-    for y in range(500, 100, -5):
+    for y in range(500, 100, -8):
             draw_boy(200, y)
 
 
@@ -56,23 +56,23 @@ def move_rectangle():
     move_bottom_2()
 
 def move_triangle_1():
-    for x in range(400, 600, 4):
+    for x in range(400, 600, 8):
         draw_boy(x, 100)
 
 def move_triangle_2():
     y = 100
-    for x in range(600, 400, -2):
+    for x in range(600, 400, -4):
         draw_boy(x, y)
-        y += 4
+        y += 8
 
 def move_triangle_3():
     y = 500
-    for x in range(400, 200, -2):
+    for x in range(400, 200, -4):
         draw_boy(x, y)
-        y -= 4
+        y -= 8
 
 def move_triangle_4():
-    for x in range(200, 400, 4):
+    for x in range(200, 400, 8):
         draw_boy(x, 100)
 
 def move_triangle():
@@ -85,6 +85,4 @@ while True:
     move_circle()
     move_rectangle()
     move_triangle()
-    # break
-
-# 반복 시행 2차 테스트
+    
