@@ -1,7 +1,6 @@
 """Drill #8: pico2d 기반 캐릭터 애니메이션 뷰어."""
 from animation_data import load_animations
-from playback import Player, REPEAT_COUNT, PAUSE_SECONDS
-from pathlib import Path
+from playback import Player
 from time import perf_counter
 
 WIDTH, HEIGHT = 800, 600
@@ -26,32 +25,9 @@ def draw_frame(sheet, frame):
     sheet.clip_draw(x, bottom, width, height, *frame_destination(frame))
 
 
-def draw_scene(p, sheet, player, font, small_font, show_bounds=False):
+def draw_scene(p, sheet, player):
     p.clear_canvas()
-    p.draw_rectangle(0, 0, WIDTH, HEIGHT, 20, 27, 40, filled=True)
-    font.draw(28, 571, "SWORDSMAN / ANIMATION VIEWER", (232, 240, 250))
-    for i, animation in enumerate(player.animations):
-        left = 28 + i * 190
-        active = i == player.animation_index
-        color = (45, 95, 105) if active else (32, 42, 58)
-        p.draw_rectangle(left, 519, left + 174, 548, *color, filled=True)
-        small_font.draw(left + 12, 534, f"{animation.label}  {len(animation.frames)}F", (225, 237, 242))
-    p.draw_line(80, FOOT_Y - 2, WIDTH - 80, FOOT_Y - 2, 65, 86, 109)
     draw_frame(sheet, player.frame)
-    if show_bounds:
-        cx, cy, w, h = frame_destination(player.frame)
-        p.draw_rectangle(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, 105, 222, 197)
-        p.draw_line(WIDTH / 2 - 8, FOOT_Y, WIDTH / 2 + 8, FOOT_Y, 255, 193, 97)
-        p.draw_line(WIDTH / 2, FOOT_Y - 8, WIDTH / 2, FOOT_Y + 8, 255, 193, 97)
-        _, _, fw, fh = player.frame.rect
-        small_font.draw(28, 108, f"Source bounds: {fw} x {fh} px", (255, 193, 97))
-    if player.finished:
-        status = f"PAUSE  {max(0, PAUSE_SECONDS - player.elapsed):.1f}s  /  5 loops complete"
-    else:
-        status = f"PLAY  {player.completed_loops + 1}/{REPEAT_COUNT}   FRAME {player.frame_index + 1}/{len(player.animation.frames)}"
-    font.draw(28, 82, status, (105, 222, 197))
-    small_font.draw(28, 47, "ESC Exit   R Restart   F1 Frame bounds", (153, 172, 194))
-    small_font.draw(28, 22, "Art: tbbk / CC0     Scale: 7x     5 loops > 1s pause > next", (153, 172, 194))
 
 
 def main():
@@ -64,11 +40,7 @@ def main():
         sheet = p.load_image(str(image_path))
         if (sheet.w, sheet.h) != size:
             raise ValueError("PNG 크기와 프레임 데이터가 일치하지 않습니다.")
-        font_path = Path(p.__file__).resolve().parent / "data" / "ConsolaMalgun.ttf"
-        font = p.load_font(str(font_path), 22)
-        small_font = p.load_font(str(font_path), 16)
         running = True
-        show_bounds = False
         player = Player(animations)
         previous = perf_counter()
         while running:
@@ -80,9 +52,7 @@ def main():
                     running = False
                 elif event.type == p.SDL_KEYDOWN and event.key == p.SDLK_r:
                     player = Player(animations)
-                elif event.type == p.SDL_KEYDOWN and event.key == p.SDLK_F1:
-                    show_bounds = not show_bounds
-            draw_scene(p, sheet, player, font, small_font, show_bounds)
+            draw_scene(p, sheet, player)
             p.update_canvas()
             p.delay(0.01)
     finally:

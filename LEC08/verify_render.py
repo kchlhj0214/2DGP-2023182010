@@ -34,20 +34,18 @@ def verify():
         p.SDL_HideWindow(backend.window)
         p.hide_lattice()
         sheet = p.load_image(str(image_path))
-        font_path = Path(p.__file__).parent / "data" / "ConsolaMalgun.ttf"
-        font, small = p.load_font(str(font_path), 22), p.load_font(str(font_path), 16)
         player = Player(animations)
         for i, animation in enumerate(animations):
             player.animation_index = i
             for j in range(len(animation.frames)):
                 player.frame_index = j
-                viewer.draw_scene(p, sheet, player, font, small, True)
+                viewer.draw_scene(p, sheet, player)
                 capture(output / f"{animation.name}-{j}.png")
                 p.update_canvas()
         player.finished = True
         player.completed_loops = 5
         player.elapsed = 0.5
-        viewer.draw_scene(p, sheet, player, font, small)
+        viewer.draw_scene(p, sheet, player)
         capture(output / "pause.png")
         p.update_canvas()
     finally:
@@ -61,13 +59,13 @@ def verify():
 
     # 실제 main 루프를 실행하며 입력만 주입한다.
     key = lambda value: SimpleNamespace(type=p.SDL_KEYDOWN, key=value)
-    for events in ([[key(p.SDLK_F1)], [key(p.SDLK_r)], [key(p.SDLK_ESCAPE)]],
+    for events in ([[key(p.SDLK_r)], [key(p.SDLK_ESCAPE)]],
                    [[SimpleNamespace(type=p.SDL_QUIT)]]):
         with patch.object(p, "open_canvas", side_effect=hidden_open), \
              patch.object(p, "get_events", side_effect=events), \
              patch.object(p, "delay"):
             viewer.main()
-    print("실제 SDL 렌더링 19프레임 + 정지 화면, F1/R/ESC/창 닫기 검증 완료")
+    print("실제 SDL 렌더링 19프레임 + 정지 화면, R/ESC/창 닫기 검증 완료")
 
 
 if __name__ == "__main__":
