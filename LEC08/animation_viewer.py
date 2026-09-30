@@ -1,4 +1,5 @@
 """Drill #8: pico2d 기반 캐릭터 애니메이션 뷰어."""
+# 최종코드
 from animation_data import load_animations
 from playback import Player
 from time import perf_counter
