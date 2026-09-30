@@ -1,5 +1,7 @@
 """Drill #8: pico2d 기반 캐릭터 애니메이션 뷰어."""
 from animation_data import load_animations
+from playback import Player
+from time import perf_counter
 
 WIDTH, HEIGHT = 800, 600
 SCALE = 7  # 몸 높이 48~52px → 336~364px: 화면 높이의 절반 이상
@@ -34,12 +36,17 @@ def main():
         if (sheet.w, sheet.h) != size:
             raise ValueError("PNG 크기와 프레임 데이터가 일치하지 않습니다.")
         running = True
+        player = Player(animations)
+        previous = perf_counter()
         while running:
+            now = perf_counter()
+            player.update(now - previous)
+            previous = now
             for event in p.get_events():
                 if event.type == p.SDL_QUIT:
                     running = False
             p.clear_canvas()
-            draw_frame(sheet, animations[0].frames[0])
+            draw_frame(sheet, player.frame)
             p.update_canvas()
             p.delay(0.01)
     finally:
