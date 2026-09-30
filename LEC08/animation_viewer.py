@@ -2,13 +2,25 @@
 from animation_data import load_animations
 
 WIDTH, HEIGHT = 800, 600
+SCALE = 7  # 몸 높이 48~52px → 336~364px: 화면 높이의 절반 이상
+FOOT_Y = 125
+
+
+def frame_destination(frame):
+    _, _, width, height = frame.rect
+    offset_x, offset_y = frame.offset
+    pivot_x, pivot_y = frame.pivot
+    # 같은 발 기준점을 유지하여 잘라낸 프레임 크기가 달라도 흔들리지 않는다.
+    return (WIDTH / 2 + (offset_x + width / 2 - pivot_x) * SCALE,
+            FOOT_Y + (pivot_y - offset_y - height / 2) * SCALE,
+            width * SCALE, height * SCALE)
 
 
 def draw_frame(sheet, frame):
     x, top, width, height = frame.rect
     # JSON은 좌상단, pico2d.clip_draw는 좌하단 기준이다.
     bottom = sheet.h - top - height
-    sheet.clip_draw(x, bottom, width, height, WIDTH / 2, HEIGHT / 2)
+    sheet.clip_draw(x, bottom, width, height, *frame_destination(frame))
 
 
 def main():
