@@ -2,6 +2,7 @@
 import math
 
 REPEAT_COUNT = 5
+PAUSE_SECONDS = 1.0
 
 
 class Player:
@@ -14,6 +15,8 @@ class Player:
         self.elapsed = 0.0
         self.completed_loops = 0
         self.finished = False
+        self.pause_elapsed = 0.0
+        self.ready_for_next = False
 
     @property
     def animation(self):
@@ -27,6 +30,8 @@ class Player:
         if not math.isfinite(dt) or dt < 0:
             raise ValueError("경과 시간은 유한한 0 이상의 값이어야 합니다.")
         if self.finished:
+            self.pause_elapsed += dt
+            self.ready_for_next = self.pause_elapsed + 1e-12 >= PAUSE_SECONDS
             return
         self.elapsed += dt
         duration = 1.0 / self.animation.fps
@@ -38,5 +43,9 @@ class Player:
                 self.completed_loops += 1
                 if self.completed_loops == REPEAT_COUNT:
                     self.finished = True
+                    # 한 update가 정지 경계를 넘었을 때 남은 시간도 보존한다.
+                    self.pause_elapsed = self.elapsed
+                    self.elapsed = 0.0
+                    self.ready_for_next = self.pause_elapsed + 1e-12 >= PAUSE_SECONDS
                     return
                 self.frame_index = 0
