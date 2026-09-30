@@ -26,7 +26,7 @@ def draw_frame(sheet, frame):
     sheet.clip_draw(x, bottom, width, height, *frame_destination(frame))
 
 
-def draw_scene(p, sheet, player, font, small_font):
+def draw_scene(p, sheet, player, font, small_font, show_bounds=False):
     p.clear_canvas()
     p.draw_rectangle(0, 0, WIDTH, HEIGHT, 20, 27, 40, filled=True)
     font.draw(28, 571, "SWORDSMAN / ANIMATION VIEWER", (232, 240, 250))
@@ -38,6 +38,13 @@ def draw_scene(p, sheet, player, font, small_font):
         small_font.draw(left + 12, 534, f"{animation.label}  {len(animation.frames)}F", (225, 237, 242))
     p.draw_line(80, FOOT_Y - 2, WIDTH - 80, FOOT_Y - 2, 65, 86, 109)
     draw_frame(sheet, player.frame)
+    if show_bounds:
+        cx, cy, w, h = frame_destination(player.frame)
+        p.draw_rectangle(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, 105, 222, 197)
+        p.draw_line(WIDTH / 2 - 8, FOOT_Y, WIDTH / 2 + 8, FOOT_Y, 255, 193, 97)
+        p.draw_line(WIDTH / 2, FOOT_Y - 8, WIDTH / 2, FOOT_Y + 8, 255, 193, 97)
+        _, _, fw, fh = player.frame.rect
+        small_font.draw(28, 108, f"Source bounds: {fw} x {fh} px", (255, 193, 97))
     if player.finished:
         status = f"PAUSE  {max(0, PAUSE_SECONDS - player.elapsed):.1f}s  /  5 loops complete"
     else:
@@ -61,6 +68,7 @@ def main():
         font = p.load_font(str(font_path), 22)
         small_font = p.load_font(str(font_path), 16)
         running = True
+        show_bounds = False
         player = Player(animations)
         previous = perf_counter()
         while running:
@@ -72,7 +80,9 @@ def main():
                     running = False
                 elif event.type == p.SDL_KEYDOWN and event.key == p.SDLK_r:
                     player = Player(animations)
-            draw_scene(p, sheet, player, font, small_font)
+                elif event.type == p.SDL_KEYDOWN and event.key == p.SDLK_F1:
+                    show_bounds = not show_bounds
+            draw_scene(p, sheet, player, font, small_font, show_bounds)
             p.update_canvas()
             p.delay(0.01)
     finally:
