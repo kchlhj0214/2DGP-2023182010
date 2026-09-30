@@ -43,8 +43,10 @@ def main():
             player.update(now - previous)
             previous = now
             for event in p.get_events():
-                if event.type == p.SDL_QUIT:
+                if event.type == p.SDL_QUIT or (event.type == p.SDL_KEYDOWN and event.key == p.SDLK_ESCAPE):
                     running = False
+                elif event.type == p.SDL_KEYDOWN and event.key == p.SDLK_r:
+                    player = Player(animations)
             p.clear_canvas()
             draw_frame(sheet, player.frame)
             p.update_canvas()
