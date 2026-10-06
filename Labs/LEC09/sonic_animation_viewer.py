@@ -38,6 +38,14 @@ class Frame:
     y: int
     width: int
     height: int
+    anchor_x: float | None = None
+    anchor_y: float | None = None
+
+    @property
+    def anchor(self):
+        # 좌상단 기준. 기본은 발 중앙이며 필요한 포즈는 따로 보정한다.
+        return (self.width / 2 if self.anchor_x is None else self.anchor_x,
+                self.height if self.anchor_y is None else self.anchor_y)
 
 
 @dataclass(frozen=True)
@@ -116,6 +124,27 @@ ANIMATIONS = (
 )
 
 
+def align_animations(animations):
+    """동작별 기준선으로 프레임 기준점을 확정한다 (좌상단 기준)."""
+    baselines = {'idle': 78, 'crouch': 78, 'walk': 118, 'run': 164,
+                 'fast_run': 274, 'dash': 318, 'turn': 371,
+                 'brake': 417, 'balance': 466}
+    result = []
+    for animation in animations:
+        frames = []
+        for frame in animation.frames:
+            # 공중 포즈는 중심 정렬, 지상 포즈는 시트의 공통 발 기준선 유지.
+            anchor_y = (baselines[animation.name] - frame.y
+                        if animation.name in baselines else frame.height / 2)
+            frames.append(Frame(frame.x, frame.y, frame.width, frame.height,
+                                frame.width / 2, anchor_y))
+        result.append(Animation(animation.name, tuple(frames), animation.frame_seconds))
+    return tuple(result)
+
+
+ANIMATIONS = align_animations(ANIMATIONS)
+
+
 def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
     if not animations:
         raise ValueError('동작 목록이 비어 있습니다.')
@@ -144,8 +173,10 @@ def load_sheet():
 
 def draw_frame(sheet, frame):
     bottom = sheet.h - frame.y - frame.height
+    anchor_x, anchor_y = frame.anchor
     sheet.clip_draw(frame.x, bottom, frame.width, frame.height,
-                    WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+                    WINDOW_WIDTH / 2 + frame.width / 2 - anchor_x,
+                    WINDOW_HEIGHT / 2 + anchor_y - frame.height / 2)
 
 
 def handle_events():
