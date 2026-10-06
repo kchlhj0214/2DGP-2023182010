@@ -19,6 +19,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from math import isfinite
+from time import perf_counter
 
 import pico2d
 
@@ -196,11 +197,15 @@ def main():
     pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     sheet = load_sheet()
     validate_animations(sheet.w, sheet.h)
+    previous_time = perf_counter()
     while handle_events():
+        now = perf_counter()
+        elapsed = now - previous_time
+        previous_time = now
         pico2d.clear_canvas()
         draw_frame(sheet, ANIMATIONS[0].frames[0])
         pico2d.update_canvas()
-        pico2d.delay(1 / TARGET_FPS)
+        pico2d.delay(max(0, 1 / TARGET_FPS - (perf_counter() - now)))
     pico2d.close_canvas()
 
 
