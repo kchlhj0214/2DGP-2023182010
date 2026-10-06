@@ -196,10 +196,10 @@ def main():
     pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     sheet = load_sheet()
     validate_animations(sheet.w, sheet.h)
-    pico2d.clear_canvas()
-    draw_frame(sheet, ANIMATIONS[0].frames[0])
-    pico2d.update_canvas()
     while handle_events():
+        pico2d.clear_canvas()
+        draw_frame(sheet, ANIMATIONS[0].frames[0])
+        pico2d.update_canvas()
         pico2d.delay(1 / TARGET_FPS)
     pico2d.close_canvas()
 
