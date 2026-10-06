@@ -162,7 +162,7 @@ class Playback:
         return self.animation.frames[self.frame_index]
 
     def update(self, seconds):
-        if self.completed:
+        if self.completed == REPEAT_COUNT:
             return
         self.elapsed += seconds
         if self.elapsed >= self.animation.frame_seconds:
@@ -171,6 +171,8 @@ class Playback:
                 self.frame_index += 1
             else:
                 self.completed += 1
+                if self.completed < REPEAT_COUNT:
+                    self.frame_index = 0
 
 
 def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
