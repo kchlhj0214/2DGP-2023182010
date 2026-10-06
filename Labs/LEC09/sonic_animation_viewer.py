@@ -146,6 +146,28 @@ def align_animations(animations):
 ANIMATIONS = align_animations(ANIMATIONS)
 
 
+@dataclass
+class Playback:
+    animation_index: int = 0
+    frame_index: int = 0
+    elapsed: float = 0.0
+
+    @property
+    def animation(self):
+        return ANIMATIONS[self.animation_index]
+
+    @property
+    def frame(self):
+        return self.animation.frames[self.frame_index]
+
+    def update(self, seconds):
+        self.elapsed += seconds
+        if self.elapsed >= self.animation.frame_seconds:
+            self.elapsed = 0.0
+            if self.frame_index < len(self.animation.frames) - 1:
+                self.frame_index += 1
+
+
 def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
     if not animations:
         raise ValueError('동작 목록이 비어 있습니다.')
@@ -197,13 +219,15 @@ def main():
     pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     sheet = load_sheet()
     validate_animations(sheet.w, sheet.h)
+    playback = Playback()
     previous_time = perf_counter()
     while handle_events():
         now = perf_counter()
         elapsed = now - previous_time
         previous_time = now
+        playback.update(elapsed)
         pico2d.clear_canvas()
-        draw_frame(sheet, ANIMATIONS[0].frames[0])
+        draw_frame(sheet, playback.frame)
         pico2d.update_canvas()
         pico2d.delay(max(0, 1 / TARGET_FPS - (perf_counter() - now)))
     pico2d.close_canvas()
