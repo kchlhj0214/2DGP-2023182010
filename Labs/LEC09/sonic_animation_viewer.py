@@ -24,7 +24,7 @@ import pico2d
 
 WINDOW_WIDTH = 1600
 WINDOW_HEIGHT = 800
-SCALE = 6
+SCALE = 8
 REPEAT_COUNT = 5
 PAUSE_SECONDS = 1.0
 DEFAULT_FRAME_SECONDS = 0.1
@@ -171,12 +171,18 @@ def load_sheet():
     return pico2d.load_image(str(path))
 
 
+def frame_placement(frame):
+    anchor_x, anchor_y = frame.anchor
+    # 지상 동작의 발을 화면 중앙보다 아래에 두어 몸통이 중앙에 보이게 한다.
+    center_x = WINDOW_WIDTH / 2 + (frame.width / 2 - anchor_x) * SCALE
+    center_y = WINDOW_HEIGHT / 2 - 140 + (anchor_y - frame.height / 2) * SCALE
+    return center_x, center_y, frame.width * SCALE, frame.height * SCALE
+
+
 def draw_frame(sheet, frame):
     bottom = sheet.h - frame.y - frame.height
-    anchor_x, anchor_y = frame.anchor
     sheet.clip_draw(frame.x, bottom, frame.width, frame.height,
-                    WINDOW_WIDTH / 2 + frame.width / 2 - anchor_x,
-                    WINDOW_HEIGHT / 2 + anchor_y - frame.height / 2)
+                    *frame_placement(frame))
 
 
 def handle_events():
