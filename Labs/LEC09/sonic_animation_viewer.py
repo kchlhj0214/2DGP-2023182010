@@ -16,6 +16,7 @@
 제목, 크레딧, 하단의 노란색·갈색 별도 캐릭터는 제외한다.
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import pico2d
@@ -27,6 +28,27 @@ REPEAT_COUNT = 5
 PAUSE_SECONDS = 1.0
 DEFAULT_FRAME_SECONDS = 0.1
 TARGET_FPS = 60
+
+
+@dataclass(frozen=True)
+class Frame:
+    # 이미지 좌상단 원점, 오른쪽으로 x 증가, 아래로 y 증가.
+    x: int
+    y: int
+    width: int
+    height: int
+
+
+@dataclass(frozen=True)
+class Animation:
+    name: str
+    frames: tuple[Frame, ...]
+    frame_seconds: float = DEFAULT_FRAME_SECONDS
+
+
+ANIMATIONS = (
+    Animation('idle', (Frame(1, 39, 29, 39),)),
+)
 
 
 def load_sheet():
