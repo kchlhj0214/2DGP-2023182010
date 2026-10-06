@@ -18,6 +18,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from math import isfinite
 
 import pico2d
 
@@ -115,6 +116,25 @@ ANIMATIONS = (
 )
 
 
+def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
+    if not animations:
+        raise ValueError('동작 목록이 비어 있습니다.')
+    names = set()
+    for animation in animations:
+        if not animation.name or animation.name in names:
+            raise ValueError(f'동작 이름이 비었거나 중복됩니다: {animation.name}')
+        names.add(animation.name)
+        if not animation.frames:
+            raise ValueError(f'{animation.name}: 프레임이 없습니다.')
+        if not isfinite(animation.frame_seconds) or animation.frame_seconds <= 0:
+            raise ValueError(f'{animation.name}: 프레임 시간은 양수여야 합니다.')
+        for index, frame in enumerate(animation.frames):
+            if (frame.x < 0 or frame.y < 0 or frame.width <= 0 or frame.height <= 0
+                    or frame.x + frame.width > sheet_width
+                    or frame.y + frame.height > sheet_height):
+                raise ValueError(f'{animation.name}[{index}]: 이미지 경계를 벗어납니다.')
+
+
 def load_sheet():
     path = Path(__file__).resolve().with_name('sonic-sprite.png')
     if not path.is_file():
@@ -138,6 +158,7 @@ def main():
     """뷰어의 단일 실행 진입점."""
     pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     sheet = load_sheet()
+    validate_animations(sheet.w, sheet.h)
     pico2d.clear_canvas()
     draw_frame(sheet, ANIMATIONS[0].frames[0])
     pico2d.update_canvas()
