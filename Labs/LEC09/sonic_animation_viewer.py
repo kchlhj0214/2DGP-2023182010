@@ -20,6 +20,14 @@ from pathlib import Path
 
 import pico2d
 
+WINDOW_WIDTH = 1600
+WINDOW_HEIGHT = 800
+SCALE = 6
+REPEAT_COUNT = 5
+PAUSE_SECONDS = 1.0
+DEFAULT_FRAME_SECONDS = 0.1
+TARGET_FPS = 60
+
 
 def load_sheet():
     path = Path(__file__).resolve().with_name('sonic-sprite.png')
@@ -36,10 +44,10 @@ def handle_events():
 
 def main():
     """뷰어의 단일 실행 진입점."""
-    pico2d.open_canvas(1600, 800)
+    pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     sheet = load_sheet()
     while handle_events():
-        pico2d.delay(0.01)
+        pico2d.delay(1 / TARGET_FPS)
     pico2d.close_canvas()
 
 
