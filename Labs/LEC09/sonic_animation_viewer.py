@@ -16,7 +16,16 @@
 제목, 크레딧, 하단의 노란색·갈색 별도 캐릭터는 제외한다.
 """
 
+from pathlib import Path
+
 import pico2d
+
+
+def load_sheet():
+    path = Path(__file__).resolve().with_name('sonic-sprite.png')
+    if not path.is_file():
+        raise FileNotFoundError(f'스프라이트 이미지가 없습니다: {path}')
+    return pico2d.load_image(str(path))
 
 
 def handle_events():
@@ -28,6 +37,7 @@ def handle_events():
 def main():
     """뷰어의 단일 실행 진입점."""
     pico2d.open_canvas(1600, 800)
+    sheet = load_sheet()
     while handle_events():
         pico2d.delay(0.01)
     pico2d.close_canvas()
