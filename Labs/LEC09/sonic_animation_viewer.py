@@ -167,6 +167,8 @@ class Playback:
     def update(self, seconds):
         if self.state == PAUSING:
             self.elapsed = min(PAUSE_SECONDS, self.elapsed + seconds)
+            if self.elapsed >= PAUSE_SECONDS:
+                self.next_animation()
             return
         self.elapsed += seconds
         if self.elapsed >= self.animation.frame_seconds:
@@ -179,6 +181,15 @@ class Playback:
                     self.frame_index = 0
                 else:
                     self.state = PAUSING
+
+    def next_animation(self):
+        if self.animation_index + 1 >= len(ANIMATIONS):
+            return
+        self.animation_index += 1
+        self.frame_index = 0
+        self.completed = 0
+        self.elapsed = 0.0
+        self.state = PLAYING
 
 
 def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
