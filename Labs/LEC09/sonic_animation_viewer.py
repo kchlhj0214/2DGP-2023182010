@@ -151,6 +151,7 @@ class Playback:
     animation_index: int = 0
     frame_index: int = 0
     elapsed: float = 0.0
+    completed: int = 0
 
     @property
     def animation(self):
@@ -161,11 +162,15 @@ class Playback:
         return self.animation.frames[self.frame_index]
 
     def update(self, seconds):
+        if self.completed:
+            return
         self.elapsed += seconds
         if self.elapsed >= self.animation.frame_seconds:
             self.elapsed = 0.0
             if self.frame_index < len(self.animation.frames) - 1:
                 self.frame_index += 1
+            else:
+                self.completed += 1
 
 
 def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
