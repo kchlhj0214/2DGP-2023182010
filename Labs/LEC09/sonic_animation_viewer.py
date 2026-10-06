@@ -189,6 +189,8 @@ class Playback:
     elapsed: float = 0.0
     completed: int = 0
     state: str = PLAYING
+    x: float = WINDOW_WIDTH / 2
+    direction: int = 1
 
     @property
     def animation(self):
@@ -198,17 +200,51 @@ class Playback:
     def frame(self):
         return self.animation.frames[self.frame_index]
 
+    def move(self, seconds):
+        animation = self.animation
+        distance = animation.move_speed * seconds
+        if animation.decelerate:
+            # 5회 재생 전체에 걸쳐 선형 감속. 시간 구간을 적분하므로
+            # 긴 업데이트와 여러 짧은 업데이트의 이동 거리가 일치한다.
+            duration = len(animation.frames) * animation.frame_seconds * REPEAT_COUNT
+            played = ((self.completed * len(animation.frames) + self.frame_index)
+                      * animation.frame_seconds + self.elapsed)
+            distance *= max(0.0, 1 - (played + seconds / 2) / duration)
+        if distance <= 0:
+            return
+        span = MOVE_RIGHT - MOVE_LEFT
+        phase = self.x - MOVE_LEFT
+        if self.direction < 0:
+            phase = 2 * span - phase
+        phase = (phase + distance) % (2 * span)
+        # 경계의 미세한 누적 오차 때문에 반전이 한 프레임 늦어지지 않게 한다.
+        if abs(phase - span) < 1e-9:
+            phase = span
+        elif phase < 1e-9 or 2 * span - phase < 1e-9:
+            phase = 0.0
+        if phase < span:
+            self.x = MOVE_LEFT + phase
+            self.direction = 1
+        else:
+            self.x = MOVE_RIGHT - (phase - span)
+            self.direction = -1
+
     def update(self, seconds):
         if not isfinite(seconds) or seconds < 0:
             raise ValueError('경과 시간은 0 이상의 유한한 값이어야 합니다.')
-        self.elapsed += seconds
         while True:
             duration = (PAUSE_SECONDS if self.state == PAUSING
                         else self.animation.frame_seconds)
+            # 재생과 정지 구간을 분리해 재생한 시간만큼만 이동한다.
+            step = min(seconds, max(0.0, duration - self.elapsed))
+            if self.state == PLAYING:
+                self.move(step)
+            self.elapsed += step
+            seconds = max(0.0, seconds - step)
             # 긴 경과 시간을 처리할 때의 누적 오차를 1ns 범위에서 보정한다.
             if self.elapsed + 1e-9 < duration:
                 break
-            self.elapsed = max(0.0, self.elapsed - duration)
+            self.elapsed = 0.0
             if self.state == PAUSING:
                 self.next_animation()
                 continue
@@ -225,6 +261,7 @@ class Playback:
         self.animation_index = (self.animation_index + 1) % len(ANIMATIONS)
         self.frame_index = 0
         self.completed = 0
+        self.elapsed = 0.0
         self.state = PLAYING
 
 
@@ -262,18 +299,22 @@ def load_sheet():
     return pico2d.load_image(str(path))
 
 
-def frame_placement(frame):
+def frame_placement(frame, x=WINDOW_WIDTH / 2, direction=1):
     anchor_x, anchor_y = frame.anchor
     # 지상 동작의 발을 화면 중앙보다 아래에 두어 몸통이 중앙에 보이게 한다.
-    center_x = WINDOW_WIDTH / 2 + (frame.width / 2 - anchor_x) * SCALE
+    center_x = x + direction * (frame.width / 2 - anchor_x) * SCALE
     center_y = GROUND_Y + (anchor_y - frame.height / 2) * SCALE
     return center_x, center_y, frame.width * SCALE, frame.height * SCALE
 
 
-def draw_frame(sheet, frame):
+def draw_frame(sheet, frame, x=WINDOW_WIDTH / 2, direction=1):
     bottom = sheet.h - frame.y - frame.height
-    sheet.clip_draw(frame.x, bottom, frame.width, frame.height,
-                    *frame_placement(frame))
+    placement = frame_placement(frame, x, direction)
+    if direction < 0:
+        sheet.clip_composite_draw(frame.x, bottom, frame.width, frame.height,
+                                  0, 'h', *placement)
+    else:
+        sheet.clip_draw(frame.x, bottom, frame.width, frame.height, *placement)
 
 
 def handle_events():
@@ -302,7 +343,7 @@ def main():
             previous_time = now
             playback.update(elapsed)
             pico2d.clear_canvas()
-            draw_frame(sheet, playback.frame)
+            draw_frame(sheet, playback.frame, playback.x, playback.direction)
             pico2d.update_canvas()
             pico2d.delay(max(0, 1 / TARGET_FPS - (perf_counter() - now)))
     finally:
