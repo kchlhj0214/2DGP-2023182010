@@ -14,6 +14,8 @@
   저장소 루트: python Labs/LEC09/sonic_animation_viewer.py
   이 폴더:     python sonic_animation_viewer.py
 창 닫기 또는 ESC로 종료. 창 크기와 배율은 아래 상수에서 변경한다.
+걷기·달리기·회전은 자동으로 좌우 이동하고, 제동은 서서히 감속한다.
+화면 가장자리에서 방향을 바꾸며 동작 사이의 1초 정지에는 위치도 유지한다.
 
 총 13동작, 76프레임. 이름은 포즈에 따른 뷰어용 분류다.
 1행은 연속된 대기 포즈와 마지막의 낮은 포즈를 분리한다.
@@ -32,6 +34,7 @@ WINDOW_WIDTH = 1600
 WINDOW_HEIGHT = 800
 SCALE = 8
 GROUND_Y = WINDOW_HEIGHT / 2 - 140
+EDGE_MARGIN = 32
 REPEAT_COUNT = 5
 PAUSE_SECONDS = 1.0
 DEFAULT_FRAME_SECONDS = 0.1
@@ -62,6 +65,8 @@ class Animation:
     name: str
     frames: tuple[Frame, ...]
     frame_seconds: float = DEFAULT_FRAME_SECONDS
+    move_speed: float = 0.0  # 화면 픽셀/초. 0이면 현재 위치에서 재생한다.
+    decelerate: bool = False
 
 
 ANIMATIONS = (
@@ -143,6 +148,8 @@ def align_animations(animations):
                    'run': 0.08, 'roll': 0.07, 'spin_ball': 0.07,
                    'fast_run': 0.08, 'dash': 0.07, 'turn': 0.12,
                    'hurt': 0.16, 'brake': 0.10, 'fall': 0.18, 'balance': 0.18}
+    move_speeds = {'walk': 160, 'run': 320, 'roll': 240, 'spin_ball': 300,
+                   'fast_run': 420, 'dash': 520, 'brake': 200}
     for animation in animations:
         frames = []
         for frame in animation.frames:
@@ -153,11 +160,26 @@ def align_animations(animations):
             frames.append(Frame(frame.x, frame.y, frame.width, frame.height,
                                 frame.width / 2, anchor_y))
         result.append(Animation(animation.name, tuple(frames),
-                                frame_times.get(animation.name, animation.frame_seconds)))
+                                frame_times.get(animation.name, animation.frame_seconds),
+                                move_speeds.get(animation.name, 0), animation.name == 'brake'))
     return tuple(result)
 
 
 ANIMATIONS = align_animations(ANIMATIONS)
+
+
+def movement_bounds(animations=ANIMATIONS):
+    """양 방향의 모든 프레임이 들어가는 공통 기준점 범위."""
+    extent = max(max(frame.anchor[0], frame.width - frame.anchor[0]) * SCALE
+                 for animation in animations for frame in animation.frames)
+    left = EDGE_MARGIN + extent
+    right = WINDOW_WIDTH - EDGE_MARGIN - extent
+    if left >= right:
+        raise ValueError('창 너비가 캐릭터의 이동 공간보다 작습니다.')
+    return left, right
+
+
+MOVE_LEFT, MOVE_RIGHT = movement_bounds()
 
 
 @dataclass
@@ -218,6 +240,8 @@ def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
             raise ValueError(f'{animation.name}: 프레임이 없습니다.')
         if not isfinite(animation.frame_seconds) or animation.frame_seconds <= 0:
             raise ValueError(f'{animation.name}: 프레임 시간은 양수여야 합니다.')
+        if not isfinite(animation.move_speed) or animation.move_speed < 0:
+            raise ValueError(f'{animation.name}: 이동 속도는 0 이상의 유한한 값이어야 합니다.')
         for index, frame in enumerate(animation.frames):
             if (frame.x < 0 or frame.y < 0 or frame.width <= 0 or frame.height <= 0
                     or frame.x + frame.width > sheet_width
