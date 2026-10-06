@@ -30,6 +30,8 @@ REPEAT_COUNT = 5
 PAUSE_SECONDS = 1.0
 DEFAULT_FRAME_SECONDS = 0.1
 TARGET_FPS = 60
+PLAYING = 'PLAYING'
+PAUSING = 'PAUSING'
 
 
 @dataclass(frozen=True)
@@ -152,6 +154,7 @@ class Playback:
     frame_index: int = 0
     elapsed: float = 0.0
     completed: int = 0
+    state: str = PLAYING
 
     @property
     def animation(self):
@@ -162,7 +165,8 @@ class Playback:
         return self.animation.frames[self.frame_index]
 
     def update(self, seconds):
-        if self.completed == REPEAT_COUNT:
+        if self.state == PAUSING:
+            self.elapsed = min(PAUSE_SECONDS, self.elapsed + seconds)
             return
         self.elapsed += seconds
         if self.elapsed >= self.animation.frame_seconds:
@@ -173,6 +177,8 @@ class Playback:
                 self.completed += 1
                 if self.completed < REPEAT_COUNT:
                     self.frame_index = 0
+                else:
+                    self.state = PAUSING
 
 
 def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
