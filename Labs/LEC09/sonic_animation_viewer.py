@@ -10,6 +10,11 @@
   9행: 제동 8장
  10행: 낙하 2장, 균형 잡기 2장
 
+실행: Python 3.10 이상 + pico2d 설치 후
+  저장소 루트: python Labs/LEC09/sonic_animation_viewer.py
+  이 폴더:     python sonic_animation_viewer.py
+창 닫기 또는 ESC로 종료. 창 크기와 배율은 아래 상수에서 변경한다.
+
 총 13동작, 76프레임. 이름은 포즈에 따른 뷰어용 분류다.
 1행은 연속된 대기 포즈와 마지막의 낮은 포즈를 분리한다.
 8·10행은 서로 다른 포즈 흐름을 각각 두 동작으로 분리한다.
@@ -26,6 +31,7 @@ import pico2d
 WINDOW_WIDTH = 1600
 WINDOW_HEIGHT = 800
 SCALE = 8
+GROUND_Y = WINDOW_HEIGHT / 2 - 140
 REPEAT_COUNT = 5
 PAUSE_SECONDS = 1.0
 DEFAULT_FRAME_SECONDS = 0.1
@@ -133,15 +139,21 @@ def align_animations(animations):
                  'fast_run': 274, 'dash': 318, 'turn': 371,
                  'brake': 417, 'balance': 466}
     result = []
+    frame_times = {'idle': 0.16, 'crouch': 0.18, 'walk': 0.10,
+                   'run': 0.08, 'roll': 0.07, 'spin_ball': 0.07,
+                   'fast_run': 0.08, 'dash': 0.07, 'turn': 0.12,
+                   'hurt': 0.16, 'brake': 0.10, 'fall': 0.18, 'balance': 0.18}
     for animation in animations:
         frames = []
         for frame in animation.frames:
             # 공중 포즈는 중심 정렬, 지상 포즈는 시트의 공통 발 기준선 유지.
             anchor_y = (baselines[animation.name] - frame.y
-                        if animation.name in baselines else frame.height / 2)
+                        if animation.name in baselines
+                        else frame.height / 2 + (WINDOW_HEIGHT / 2 - GROUND_Y) / SCALE)
             frames.append(Frame(frame.x, frame.y, frame.width, frame.height,
                                 frame.width / 2, anchor_y))
-        result.append(Animation(animation.name, tuple(frames), animation.frame_seconds))
+        result.append(Animation(animation.name, tuple(frames),
+                                frame_times.get(animation.name, animation.frame_seconds)))
     return tuple(result)
 
 
@@ -171,8 +183,8 @@ class Playback:
         while True:
             duration = (PAUSE_SECONDS if self.state == PAUSING
                         else self.animation.frame_seconds)
-            # 반복 뺄셈의 미세한 부동소수점 오차만 보정한다.
-            if self.elapsed + 1e-12 < duration:
+            # 긴 경과 시간을 처리할 때의 누적 오차를 1ns 범위에서 보정한다.
+            if self.elapsed + 1e-9 < duration:
                 break
             self.elapsed = max(0.0, self.elapsed - duration)
             if self.state == PAUSING:
@@ -211,6 +223,12 @@ def validate_animations(sheet_width, sheet_height, animations=ANIMATIONS):
                     or frame.x + frame.width > sheet_width
                     or frame.y + frame.height > sheet_height):
                 raise ValueError(f'{animation.name}[{index}]: 이미지 경계를 벗어납니다.')
+            if not all(isfinite(value) for value in frame.anchor):
+                raise ValueError(f'{animation.name}[{index}]: 기준점이 유효하지 않습니다.')
+            x, y, width, height = frame_placement(frame)
+            if (x - width / 2 < 0 or x + width / 2 > WINDOW_WIDTH
+                    or y - height / 2 < 0 or y + height / 2 > WINDOW_HEIGHT):
+                raise ValueError(f'{animation.name}[{index}]: 확대된 프레임이 창을 벗어납니다.')
 
 
 def load_sheet():
@@ -224,7 +242,7 @@ def frame_placement(frame):
     anchor_x, anchor_y = frame.anchor
     # 지상 동작의 발을 화면 중앙보다 아래에 두어 몸통이 중앙에 보이게 한다.
     center_x = WINDOW_WIDTH / 2 + (frame.width / 2 - anchor_x) * SCALE
-    center_y = WINDOW_HEIGHT / 2 - 140 + (anchor_y - frame.height / 2) * SCALE
+    center_y = GROUND_Y + (anchor_y - frame.height / 2) * SCALE
     return center_x, center_y, frame.width * SCALE, frame.height * SCALE
 
 
@@ -249,6 +267,7 @@ def main():
     pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     sheet = None
     try:
+        pico2d.hide_lattice()
         sheet = load_sheet()
         validate_animations(sheet.w, sheet.h)
         playback = Playback()
