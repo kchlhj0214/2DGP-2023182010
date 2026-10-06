@@ -235,28 +235,37 @@ def draw_frame(sheet, frame):
 
 
 def handle_events():
-    """창 닫기 요청이 없으면 실행을 계속한다."""
-    return not any(event.type == pico2d.SDL_QUIT
-                   for event in pico2d.get_events())
+    """재생·정지 상태와 무관하게 종료 입력을 처리한다."""
+    for event in pico2d.get_events():
+        if event.type == pico2d.SDL_QUIT:
+            return False
+        if event.type == pico2d.SDL_KEYDOWN and event.key == pico2d.SDLK_ESCAPE:
+            return False
+    return True
 
 
 def main():
     """뷰어의 단일 실행 진입점."""
     pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
-    sheet = load_sheet()
-    validate_animations(sheet.w, sheet.h)
-    playback = Playback()
-    previous_time = perf_counter()
-    while handle_events():
-        now = perf_counter()
-        elapsed = now - previous_time
-        previous_time = now
-        playback.update(elapsed)
-        pico2d.clear_canvas()
-        draw_frame(sheet, playback.frame)
-        pico2d.update_canvas()
-        pico2d.delay(max(0, 1 / TARGET_FPS - (perf_counter() - now)))
-    pico2d.close_canvas()
+    sheet = None
+    try:
+        sheet = load_sheet()
+        validate_animations(sheet.w, sheet.h)
+        playback = Playback()
+        previous_time = perf_counter()
+        while handle_events():
+            now = perf_counter()
+            elapsed = now - previous_time
+            previous_time = now
+            playback.update(elapsed)
+            pico2d.clear_canvas()
+            draw_frame(sheet, playback.frame)
+            pico2d.update_canvas()
+            pico2d.delay(max(0, 1 / TARGET_FPS - (perf_counter() - now)))
+    finally:
+        # SDL 렌더러가 살아 있을 때 이미지 텍스처부터 해제한다.
+        del sheet
+        pico2d.close_canvas()
 
 
 if __name__ == '__main__':
