@@ -16,10 +16,21 @@
 제목, 크레딧, 하단의 노란색·갈색 별도 캐릭터는 제외한다.
 """
 
+import pico2d
+
+
+def handle_events():
+    """창 닫기 요청이 없으면 실행을 계속한다."""
+    return not any(event.type == pico2d.SDL_QUIT
+                   for event in pico2d.get_events())
+
 
 def main():
     """뷰어의 단일 실행 진입점."""
-    pass
+    pico2d.open_canvas(1600, 800)
+    while handle_events():
+        pico2d.delay(0.01)
+    pico2d.close_canvas()
 
 
 if __name__ == '__main__':
