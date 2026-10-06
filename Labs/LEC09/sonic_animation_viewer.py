@@ -58,10 +58,10 @@ class Animation:
 ANIMATIONS = (
     Animation('idle', (
         Frame(1, 39, 29, 39), Frame(31, 40, 26, 38),
-        Frame(58, 39, 29, 39), Frame(87, 40, 29, 38),
+        Frame(58, 39, 28, 39), Frame(86, 40, 30, 38),
         Frame(118, 40, 30, 38), Frame(150, 40, 30, 38),
-        Frame(182, 40, 31, 38), Frame(213, 39, 30, 38),
-        Frame(243, 39, 26, 38),
+        Frame(182, 40, 29, 38), Frame(211, 39, 29, 38),
+        Frame(240, 39, 29, 38),
     )),
     Animation('crouch', (
         Frame(270, 45, 24, 32), Frame(302, 51, 29, 26),
