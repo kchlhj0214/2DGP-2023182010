@@ -82,6 +82,36 @@ ANIMATIONS = (
         Frame(70, 206, 29, 27), Frame(105, 206, 29, 27),
         Frame(139, 206, 29, 27), Frame(174, 206, 29, 27),
     )),
+    Animation('fast_run', (
+        Frame(1, 239, 29, 35), Frame(36, 239, 30, 35),
+        Frame(74, 239, 31, 35), Frame(111, 238, 31, 36),
+        Frame(149, 239, 30, 35), Frame(186, 238, 31, 36),
+    )),
+    Animation('dash', (
+        Frame(1, 283, 29, 35), Frame(36, 283, 30, 35),
+        Frame(72, 286, 39, 31), Frame(123, 285, 39, 32),
+        Frame(172, 286, 39, 31), Frame(218, 285, 38, 32),
+    )),
+    Animation('turn', (
+        Frame(1, 326, 24, 45), Frame(31, 327, 29, 44),
+        Frame(65, 327, 20, 44), Frame(90, 327, 25, 43),
+        Frame(119, 327, 25, 43), Frame(149, 327, 20, 44),
+    )),
+    Animation('hurt', (
+        Frame(184, 341, 40, 28), Frame(232, 341, 39, 27),
+    )),
+    Animation('brake', (
+        Frame(1, 379, 27, 38), Frame(31, 379, 31, 36),
+        Frame(64, 379, 31, 36), Frame(99, 377, 33, 38),
+        Frame(136, 379, 32, 36), Frame(176, 379, 33, 36),
+        Frame(217, 379, 33, 36), Frame(254, 378, 33, 36),
+    )),
+    Animation('fall', (
+        Frame(6, 429, 34, 40), Frame(49, 426, 34, 43),
+    )),
+    Animation('balance', (
+        Frame(96, 427, 23, 39), Frame(125, 427, 23, 39),
+    )),
 )
 
 
