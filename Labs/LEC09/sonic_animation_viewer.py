@@ -58,6 +58,12 @@ def load_sheet():
     return pico2d.load_image(str(path))
 
 
+def draw_frame(sheet, frame):
+    bottom = sheet.h - frame.y - frame.height
+    sheet.clip_draw(frame.x, bottom, frame.width, frame.height,
+                    WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+
+
 def handle_events():
     """창 닫기 요청이 없으면 실행을 계속한다."""
     return not any(event.type == pico2d.SDL_QUIT
@@ -68,6 +74,9 @@ def main():
     """뷰어의 단일 실행 진입점."""
     pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     sheet = load_sheet()
+    pico2d.clear_canvas()
+    draw_frame(sheet, ANIMATIONS[0].frames[0])
+    pico2d.update_canvas()
     while handle_events():
         pico2d.delay(1 / TARGET_FPS)
     pico2d.close_canvas()
