@@ -165,14 +165,19 @@ class Playback:
         return self.animation.frames[self.frame_index]
 
     def update(self, seconds):
-        if self.state == PAUSING:
-            self.elapsed = min(PAUSE_SECONDS, self.elapsed + seconds)
-            if self.elapsed >= PAUSE_SECONDS:
-                self.next_animation()
-            return
+        if not isfinite(seconds) or seconds < 0:
+            raise ValueError('경과 시간은 0 이상의 유한한 값이어야 합니다.')
         self.elapsed += seconds
-        if self.elapsed >= self.animation.frame_seconds:
-            self.elapsed = 0.0
+        while True:
+            duration = (PAUSE_SECONDS if self.state == PAUSING
+                        else self.animation.frame_seconds)
+            # 반복 뺄셈의 미세한 부동소수점 오차만 보정한다.
+            if self.elapsed + 1e-12 < duration:
+                break
+            self.elapsed = max(0.0, self.elapsed - duration)
+            if self.state == PAUSING:
+                self.next_animation()
+                continue
             if self.frame_index < len(self.animation.frames) - 1:
                 self.frame_index += 1
             else:
@@ -186,7 +191,6 @@ class Playback:
         self.animation_index = (self.animation_index + 1) % len(ANIMATIONS)
         self.frame_index = 0
         self.completed = 0
-        self.elapsed = 0.0
         self.state = PLAYING
 
 
